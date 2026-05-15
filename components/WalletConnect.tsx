@@ -1,26 +1,19 @@
 "use client";
 
-import { isConnected, getAddress } from "@stellar/freighter-api";
-import { useTradeFlowStore } from "@/store/useTradeFlowStore"; // 1. Import the "Sticky Note"
+import { useTradeFlowStore } from '@/store/useTradeFlowStore';
+import { getWalletAddress } from '@/lib/wallet';
 
 export default function WalletConnect() {
-  // 2. This line lets us "write" to the memory
   const setUserAddress = useTradeFlowStore((state) => state.setUserAddress);
   const userAddress = useTradeFlowStore((state) => state.userAddress);
 
   const connect = async () => {
     try {
-      if (await isConnected()) {
-        const result = await getAddress();
-        const address = typeof result === 'string' ? result : (result as any).address;
-        
-        // 3. Save it to the app's memory!
-        setUserAddress(address); 
-      } else {
-        alert("Please install Freighter!");
-      }
-    } catch (e) {
-      console.error(e);
+      const address = await getWalletAddress();
+      setUserAddress(address);
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : 'Unable to connect Freighter.');
     }
   };
 
@@ -29,13 +22,13 @@ export default function WalletConnect() {
   return (
     <div>
       {userAddress ? (
-        <div className="bg-green-900/30 text-green-400 px-4 py-2 rounded-lg border border-green-500/50">
+        <div className="bg-emerald-500/10 text-emerald-300 px-4 py-2 rounded-lg border border-emerald-500/40 text-sm font-semibold">
           Account: {formatAddress(userAddress)}
         </div>
       ) : (
-        <button 
+        <button
           onClick={connect}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full font-bold shadow-lg"
+          className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-blue-950/30 transition-colors"
         >
           Connect Wallet
         </button>
